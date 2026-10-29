@@ -339,8 +339,8 @@ export class Board {
       const pos = this._pos(to);
       const down = pos.y > 300;                      // destination on the lower half: stack upwards
       const order = ["q", "n", "r", "b"];
-      el.style.left = pos.x + "%";
-      el.style.top = (down ? pos.y - 300 : pos.y) + "%";
+      el.style.left = pos.x / 8 + "%";                 // _pos is in percent of one square; the picker is placed in percent of the board
+      el.style.top = (down ? pos.y - 300 : pos.y) / 8 + "%";
       const close = (v) => { el.hidden = true; el.onclick = null; resolve(v); };
       const list = down ? order.slice().reverse() : order;
       for (const p of list) {
