@@ -1,5 +1,5 @@
 import { Chess } from "../vendor/chess.js";
-import { Board, parsePlacement } from "./board.js?v=20261030b";
+import { Board, parsePlacement } from "./board.js?v=20261030d";
 import { UciEngine, engineDefs } from "./engine.js";
 import { EvalChart, whiteWin, fmtScore } from "./chart.js";
 

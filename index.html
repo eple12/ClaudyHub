@@ -37,7 +37,7 @@ iframe[hidden]{display:none}
 .spin{width:28px;height:28px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--acc);animation:r .8s linear infinite}
 @keyframes r{to{transform:rotate(360deg)}}
 @media (max-width:720px){body{flex-direction:column}nav{width:auto;flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line);padding:8px}.tab{flex:none}.tab span,.brand,.foot{display:none}}
-</style>
+html{cursor:default;-webkit-user-select:none;user-select:none}input,textarea,[contenteditable]{cursor:text;-webkit-user-select:text;user-select:text}button,select,a{cursor:pointer}</style>
 </head>
 <body>
 <nav role="tablist" aria-label="프로그램">
@@ -59,9 +59,9 @@ iframe[hidden]{display:none}
 </main>
 <script>
 const APPS={
-  chess:{title:'Claudy 체스',url:'chess/?v=20261030b'},
-  five:{title:'ClaudyFive 오목',url:'five/?v=20261030b'},
-  shape:{title:'shape 도형 인식',url:'shape/?v=20261030b'}};
+  chess:{title:'Claudy 체스',url:'chess/?v=20261030d'},
+  five:{title:'ClaudyFive 오목',url:'five/?v=20261030d'},
+  shape:{title:'shape 도형 인식',url:'shape/?v=20261030d'}};
 const $=s=>document.querySelector(s);
 let cur=null;
 function show(id){

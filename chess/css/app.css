@@ -142,7 +142,7 @@ a:hover { text-decoration: underline; }
   background: radial-gradient(ellipse at center, #f00 0%, #e70000 25%, rgba(169, 0, 0, 0) 89%);
 }
 .sq.tgt.x::after { content: ""; position: absolute; left: 36%; top: 36%; width: 28%; height: 28%; border-radius: 50%; background: rgba(20, 85, 30, .5); z-index: 4; }
-.sq.tgt.cap::after { content: ""; position: absolute; inset: 0; background: radial-gradient(transparent 0%, transparent 79%, rgba(20, 85, 0, .3) 80%); z-index: 4; }
+.sq.tgt.cap::after { content: ""; position: absolute; inset: 0; background: radial-gradient(circle closest-side, transparent 78%, rgba(20, 85, 0, .45) 80%); z-index: 7; }
 .coord { position: absolute; font-size: clamp(9px, 2.5cqw, 15px); font-weight: 700; line-height: 1; z-index: 1; pointer-events: none; }
 .coord.rank { top: 3%; left: 4%; }
 .coord.file { bottom: 3%; right: 5%; }
@@ -246,3 +246,8 @@ dialog textarea { width: 100%; font: 12.5px/1.4 ui-monospace, "Roboto Mono", "Ca
   .controls { padding-left: 0; }
   .evalbar { width: 10px; }
 }
+
+/* no text cursor / text selection on the UI; only real inputs keep them */
+html { cursor: default; -webkit-user-select: none; user-select: none; }
+input, textarea, [contenteditable] { cursor: text; -webkit-user-select: text; user-select: text; }
+button, select, a, summary, label[for] { cursor: pointer; }

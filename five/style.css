@@ -202,3 +202,8 @@ body.numbers .stone.last .num { color: var(--last); }
   .stone.new, .hintmark { animation: none; }
   .evalbar .fill { transition: none; }
 }
+
+/* no text cursor / text selection on the UI; only real inputs keep them */
+html { cursor: default; -webkit-user-select: none; user-select: none; }
+input, textarea, [contenteditable] { cursor: text; -webkit-user-select: text; user-select: text; }
+button, select, a, summary, label[for] { cursor: pointer; }
