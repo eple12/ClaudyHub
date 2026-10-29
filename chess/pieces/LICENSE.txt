@@ -1,0 +1,4 @@
+Caliente chess pieces by avi (https://github.com/avi-0/caliente), as distributed with lichess.org
+(lichess-org/lila, public/piece/caliente). License: CC BY-NC-SA 4.0
+https://creativecommons.org/licenses/by-nc-sa/4.0/
+The PNG files are 256 px renders of the original SVG files, unmodified otherwise.

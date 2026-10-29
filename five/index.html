@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#161512">
+<title>ClaudyFive · 오목</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23dcb870'/%3E%3Ccircle cx='12' cy='12' r='8' fill='%23222'/%3E%3Ccircle cx='20' cy='20' r='8' fill='%23f4f4f4' stroke='%23999'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header id="top">
+  <div class="brand">
+    <svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true"><rect width="32" height="32" rx="6" fill="#dcb870"/><circle cx="12" cy="12" r="8" fill="#222"/><circle cx="20" cy="20" r="8" fill="#f4f4f4" stroke="#999"/></svg>
+    <span>ClaudyFive</span>
+  </div>
+  <div id="chips">
+    <span class="chip">자유룰 15×15</span>
+    <span class="chip opt">레벨 <b id="chip-level">5</b></span>
+  </div>
+  <div class="spacer"></div>
+  <button id="btn-theme" class="pill" title="밝은/어두운 테마">☀︎</button>
+</header>
+
+<main id="main">
+  <div id="game">
+    <div id="left">
+      <div class="player" id="pl-top">
+        <span class="stone-ico" id="top-ico"></span>
+        <span class="name" id="top-name">ClaudyFive</span>
+        <span class="status" id="top-status"></span>
+      </div>
+      <div class="board-row">
+        <div class="evalbar" id="evalbar" hidden><div class="fill" id="evalfill"></div><span class="txt" id="evaltxt"></span></div>
+        <div class="board" id="board">
+          <svg id="grid" viewBox="0 0 16 16" preserveAspectRatio="none" aria-hidden="true"></svg>
+          <div id="stones"></div>
+          <div class="ghost" id="ghost" hidden></div>
+          <div class="hintmark" id="hintmark" hidden></div>
+          <div class="banner" id="banner" hidden><div id="banner-text"></div><button id="banner-new" class="primary">새 게임</button></div>
+        </div>
+      </div>
+      <div class="player" id="pl-bot">
+        <span class="stone-ico" id="bot-ico"></span>
+        <span class="name" id="bot-name">나</span>
+        <span class="status" id="bot-status"></span>
+      </div>
+    </div>
+
+    <div id="right">
+      <section class="panel" id="p-new">
+        <h3>새 게임</h3>
+        <div class="formrow">
+          <label>내 돌
+            <select id="sel-color">
+              <option value="black">흑 (선공)</option>
+              <option value="white">백 (후공)</option>
+              <option value="random">무작위</option>
+            </select>
+          </label>
+          <button id="btn-new" class="primary">새 게임</button>
+        </div>
+        <h3 class="sub">난이도 <span class="dim" id="lvl-name"></span></h3>
+        <div id="levels" role="radiogroup" aria-label="난이도"></div>
+        <p class="dim small" id="lvl-info"></p>
+      </section>
+
+      <section class="panel" id="p-actions">
+        <div class="controls">
+          <button id="btn-undo" title="한 수 무르기 (U)">무르기</button>
+          <button id="btn-hint" title="엔진이 추천수를 알려줘요 (H)">힌트</button>
+          <button id="btn-resign" class="danger">기권</button>
+        </div>
+        <div class="toggles">
+          <label><input type="checkbox" id="opt-analysis"> 엔진 분석 보기</label>
+          <label><input type="checkbox" id="opt-numbers"> 수순 번호</label>
+          <label><input type="checkbox" id="opt-sound" checked> 소리</label>
+        </div>
+      </section>
+
+      <section class="panel" id="p-engine" hidden>
+        <h3>엔진 분석</h3>
+        <div id="eng-summary">
+          <span class="big num" id="eng-eval">–</span>
+          <span class="kv">깊이 <b class="num" id="eng-depth">–</b></span>
+          <span class="kv">노드 <b class="num" id="eng-nodes">–</b></span>
+          <span class="kv">속도 <b class="num" id="eng-nps">–</b></span>
+          <span class="kv">시간 <b class="num" id="eng-time">–</b></span>
+        </div>
+        <div class="pv" id="eng-pv"></div>
+      </section>
+
+      <section class="panel" id="p-moves">
+        <h3>기보 <span class="dim" id="mv-count"></span></h3>
+        <div id="moves"></div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<script src="engine.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>shape</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f4f5;--fg:#18181b;--mut:#71717a;--line:#d4d4d8;--acc:#d9420f;--ink:#18181b}
+:root[data-theme=dark]{--bg:#0e0e10;--fg:#ececee;--mut:#797982;--line:#2a2a2f;--acc:#ff6a3d;--ink:#ececee}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--fg);font:15px/1.5 "Geist","Pretendard","Malgun Gothic",system-ui,sans-serif;min-height:100dvh;transition:background .25s,color .25s}
+button,input{font:inherit;color:inherit;background:none;border:0;border-radius:0;outline:none}
+button{cursor:pointer}
+.app{max-width:1120px;margin:0 auto;padding:24px 32px 32px;display:grid;grid-template-columns:minmax(0,1fr) 320px;grid-template-rows:auto 1fr;column-gap:64px}
+header{grid-column:1/-1;display:flex;justify-content:space-between;align-items:baseline;margin-bottom:28px}
+.logo{font-weight:600;letter-spacing:-.02em}
+.mono{font-family:"Geist Mono",ui-monospace,Consolas,monospace}
+#theme{color:var(--mut);font-size:13px;transition:color .2s}
+#theme:hover{color:var(--fg)}
+.left{min-width:0}
+.pad{position:relative;width:min(100%,calc(100dvh - 190px));aspect-ratio:1;border:1px solid var(--line);transition:border-color .25s}
+canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:crosshair}
+.hint{position:absolute;inset:0;display:grid;place-items:center;color:var(--mut);pointer-events:none;transition:opacity .3s;letter-spacing:.02em}
+.shapes{display:flex;flex-wrap:wrap;gap:4px 18px;margin-top:16px;font-size:13px;color:var(--mut)}
+.shapes span{transition:color .3s}
+.shapes span.on{color:var(--acc)}
+.shapes button{margin-left:auto;color:var(--mut);transition:color .2s}
+.shapes button:hover{color:var(--fg)}
+.right{display:flex;flex-direction:column;padding-top:2px;min-width:0}
+.name{color:var(--mut);height:24px}
+.big{font-weight:300;font-size:clamp(84px,10vw,128px);line-height:.95;letter-spacing:-.05em;font-variant-numeric:tabular-nums;margin:6px 0 4px -4px;white-space:nowrap}
+.big small{font-size:.28em;letter-spacing:0;color:var(--mut);margin-left:6px}
+.big.hit{color:var(--acc)}
+.sub{color:var(--mut);font-size:13px;height:20px}
+form{margin-top:22px;display:flex;align-items:flex-end;gap:16px;opacity:0;pointer-events:none;transition:opacity .3s}
+form.on{opacity:1;pointer-events:auto}
+label{display:block;font-size:12px;color:var(--mut);margin-bottom:2px}
+.f{flex:1;min-width:0}
+input{width:100%;padding:6px 0;border-bottom:1px solid var(--line);transition:border-color .2s}
+input:focus{border-color:var(--acc)}
+.go{color:var(--acc);font-weight:500;padding:6px 0}
+.skip{color:var(--mut);padding:6px 0;font-size:13px}
+.go:hover,.skip:hover{text-decoration:underline;text-underline-offset:4px}
+.lb{margin-top:auto;padding-top:40px}
+.lb h3{font-weight:400;font-size:13px;color:var(--mut);margin-bottom:10px}
+.row{display:grid;grid-template-columns:22px 1fr auto 52px;gap:10px;align-items:baseline;padding:5px 0;font-size:14px}
+.row .rk{color:var(--mut);font-size:12px}
+.row .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .sh{color:var(--mut);font-size:13px}
+.row .pc{text-align:right}
+.row:first-child .pc,.row:first-child .rk{color:var(--acc)}
+.row.new{animation:fl 2s}
+@keyframes fl{0%,50%{background:color-mix(in srgb,var(--acc) 16%,transparent)}}
+.empty{color:var(--mut);font-size:13px}
+@media(max-width:820px){.app{grid-template-columns:1fr;padding:16px}.pad{width:100%}.big{font-size:84px}.lb{padding-top:28px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="logo">shape</div>
+    <button id="theme" class="mono"></button>
+  </header>
+  <div class="left">
+    <div class="pad">
+      <canvas id="cv"></canvas>
+      <div class="hint" id="hint">그리기</div>
+    </div>
+    <div class="shapes" id="shapes"></div>
+  </div>
+  <div class="right">
+    <div class="name" id="rn"></div>
+    <div class="big mono" id="big"><span id="pct">0.0</span><small>%</small></div>
+    <div class="sub" id="rs"></div>
+    <form id="form" autocomplete="off">
+      <div class="f"><label for="nick">닉네임</label><input id="nick" maxlength="12"></div>
+      <button class="go" type="submit">저장</button>
+      <button class="skip" type="button" id="skip">건너뛰기</button>
+    </form>
+    <div class="lb"><h3>리더보드 (이 기기)</h3><div id="board" class="mono"></div></div>
+  </div>
+</div>
+<script src="core.js"></script>
+<script>
+const $=s=>document.querySelector(s),cv=$('#cv'),cx=cv.getContext('2d'),B=480;
+let strokes=[],timer,rid=null,cur=null,fit=null,fp=1,busy=false,last=0;
+const root=document.documentElement,css=v=>getComputedStyle(root).getPropertyValue(v).trim();
+const calm=matchMedia('(prefers-reduced-motion:reduce)').matches;
+function setTheme(t){root.dataset.theme=t;$('#theme').textContent=t==='dark'?'light':'dark';try{localStorage.theme=t}catch{}redraw()}
+let saved;try{saved=localStorage.theme}catch{}
+setTheme(saved||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'));
+$('#theme').onclick=()=>setTheme(root.dataset.theme==='dark'?'light':'dark');
+
+let pw=0;
+function size(){const d=devicePixelRatio||1,w=cv.clientWidth;if(pw&&pw!==w)strokes=strokes.map(s=>s.map(p=>[p[0]*w/pw,p[1]*w/pw]));pw=w;cv.width=cv.height=Math.round(w*d);cx.setTransform(d,0,0,d,0,0);redraw()}
+addEventListener('resize',size);
+function path(p,n){const m=n??p.length;cx.beginPath();cx.moveTo(p[0][0],p[0][1]);
+  for(let i=1;i<m-1;i++){const a=p[i],b=p[i+1];cx.quadraticCurveTo(a[0],a[1],(a[0]+b[0])/2,(a[1]+b[1])/2)}
+  if(m>1)cx.lineTo(p[m-1][0],p[m-1][1]);cx.stroke()}
+function redraw(){const w=cv.clientWidth;cx.clearRect(0,0,w,w);cx.lineCap=cx.lineJoin='round';
+  cx.lineWidth=3.5;cx.strokeStyle=css('--ink');strokes.forEach(s=>s.length>1&&path(s));
+  if(fit){const k=w/B;cx.strokeStyle=css('--acc');cx.lineWidth=2;path(fit.map(p=>[p[0]*k,p[1]*k]),Math.max(2,Math.floor(fit.length*fp)))}}
+function mark(i){document.querySelectorAll('#shapes span').forEach((c,j)=>c.classList.toggle('on',j===i))}
+function reset(){clearTimeout(timer);strokes=[];fit=null;cur=rid=null;fp=1;redraw();$('#hint').style.opacity=1;$('#form').classList.remove('on');
+  $('#rn').textContent='';$('#rs').textContent='';$('#pct').textContent='0.0';$('#big').classList.remove('hit');mark(-1)}
+
+const pt=e=>{const r=cv.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top]};
+cv.onpointerdown=e=>{if(busy)return;if(fit||cur)reset();clearTimeout(timer);cv.setPointerCapture(e.pointerId);strokes.push([pt(e)]);$('#hint').style.opacity=0};
+cv.onpointermove=e=>{if(!(e.buttons&1)||busy||!strokes.length)return;strokes.at(-1).push(pt(e));redraw()};
+cv.onpointerup=()=>{if(strokes.length&&!busy)timer=setTimeout(go,600)};
+addEventListener('keydown',e=>{if(e.key==='Escape')reset()});
+
+function ease(f,ms){if(calm)return f(1);const t0=performance.now();(function s(t){const p=Math.min(1,(t-t0)/ms);f(1-Math.pow(1-p,3));if(p<1)requestAnimationFrame(s)})(t0)}
+async function go(){
+  const k=B/cv.clientWidth;busy=true;$('#rn').textContent='분석 중';
+  await new Promise(r=>setTimeout(r,30));
+  let r;try{r=Shape.recognize(strokes.map(s=>s.map(p=>[p[0]*k,p[1]*k])))}catch{r={error:'err'}}
+  busy=false;
+  if(r.error){reset();$('#rs').textContent=r.error==='short'?'조금 더 크게 그려주세요':'오류가 발생했어요';return}
+  cur=r;fit=r.fit.map(p=>[p[0],p[1]]);last=r.pct;mark(r.idx);$('#rn').textContent=r.name;$('#rs').textContent='CNN '+r.conf+'%';$('#big').classList.add('hit');
+  ease(p=>{fp=p;redraw();$('#pct').textContent=(r.pct*p).toFixed(1)},900);
+  $('#form').classList.add('on');$('#nick').value='';$('#nick').focus({preventScroll:true})}
+
+// leaderboard: stored on this device only (GitHub Pages has no backend)
+const KEY='shape-board';let mem=[];
+const load=()=>{try{return JSON.parse(localStorage[KEY]||'[]')}catch{return mem}};
+const store=b=>{mem=b;try{localStorage[KEY]=JSON.stringify(b)}catch{}};
+function render(b,mine){const el=$('#board');el.innerHTML=b.length?'':'<div class="empty">기록 없음</div>';
+  b.forEach((e,i)=>{const d=document.createElement('div');d.className='row'+(i===mine?' new':'');
+    d.innerHTML=`<span class="rk">${i+1}</span><span class="nm"></span><span class="sh">${e.shape}</span><span class="pc">${e.pct.toFixed(1)}</span>`;
+    d.querySelector('.nm').textContent=e.name;el.append(d)})}
+$('#form').onsubmit=e=>{e.preventDefault();const n=$('#nick').value.trim().slice(0,12);if(!n||!cur)return;
+  const all=load();all.push({name:n,shape:cur.name,pct:cur.pct});all.sort((a,b)=>b.pct-a.pct);store(all.slice(0,100));
+  const b=all.slice(0,10),mine=b.findIndex(x=>x.name===n&&x.pct===cur.pct);cur=null;
+  $('#form').classList.remove('on');$('#rs').textContent='저장됨';render(b,mine)};
+$('#skip').onclick=reset;
+
+$('#shapes').innerHTML=Shape.NAMES.map(x=>`<span>${x}</span>`).join('')+'<button id="clr">지우기</button>';$('#clr').onclick=reset;
+render(load().slice(0,10));
+Shape.load().catch(()=>{$('#rs').textContent='모델을 불러오지 못했어요'});
+size();
+</script>
+</body>
+</html>

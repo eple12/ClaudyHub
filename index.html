@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script src="coi-serviceworker.js"></script>
+<title>Claudy Hub</title>
+<style>
+:root{--bg:#0f1115;--panel:#161a21;--line:#252b36;--fg:#e6e9ef;--mut:#8b94a5;--acc:#6ea8fe;--ok:#4ade80;--warn:#fbbf24}
+@media (prefers-color-scheme:light){:root{--bg:#f5f6f8;--panel:#fff;--line:#e2e5ea;--fg:#1a1d24;--mut:#667085;--acc:#2f6fed;--ok:#16a34a;--warn:#d97706}}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{display:flex;background:var(--bg);color:var(--fg);font:14px/1.5 system-ui,"Segoe UI","Malgun Gothic",sans-serif}
+nav{width:248px;flex:none;background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:18px 12px}
+.brand{font-weight:650;font-size:17px;padding:2px 10px 16px;letter-spacing:-.01em}
+.brand small{display:block;font-weight:400;font-size:12px;color:var(--mut);margin-top:2px}
+.tab{all:unset;cursor:pointer;display:block;padding:10px 12px;border-radius:10px;margin-bottom:4px;border:1px solid transparent}
+.tab:hover{background:color-mix(in srgb,var(--fg) 6%,transparent)}
+.tab:focus-visible{outline:2px solid var(--acc)}
+.tab[aria-selected=true]{background:color-mix(in srgb,var(--acc) 14%,transparent);border-color:color-mix(in srgb,var(--acc) 40%,transparent)}
+.tab b{display:flex;align-items:center;gap:8px;font-weight:600}
+.tab span{display:block;color:var(--mut);font-size:12.5px;margin-top:2px}
+.foot{margin-top:auto;padding:10px;color:var(--mut);font-size:12px}
+main{flex:1;display:flex;flex-direction:column;min-width:0}
+header{height:48px;flex:none;display:flex;align-items:center;gap:10px;padding:0 16px;border-bottom:1px solid var(--line);background:var(--panel)}
+header h1{font-size:14px;font-weight:600}
+header .sp{flex:1}
+.btn{all:unset;cursor:pointer;padding:5px 12px;border-radius:8px;border:1px solid var(--line);font-size:13px;color:var(--fg)}
+.btn:hover{border-color:var(--acc);color:var(--acc)}
+.btn:focus-visible{outline:2px solid var(--acc)}
+.btn[hidden]{display:none}
+.stage{flex:1;position:relative}
+iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:var(--bg)}
+iframe[hidden]{display:none}
+.cover{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:var(--bg);color:var(--mut);text-align:center;padding:24px}
+.cover[hidden]{display:none}
+.spin{width:28px;height:28px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--acc);animation:r .8s linear infinite}
+@keyframes r{to{transform:rotate(360deg)}}
+@media (max-width:720px){body{flex-direction:column}nav{width:auto;flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line);padding:8px}.tab{flex:none}.tab span,.brand,.foot{display:none}}
+</style>
+</head>
+<body>
+<nav role="tablist" aria-label="프로그램">
+  <div class="brand">Claudy Hub</div>
+  <button class="tab" role="tab" data-id="chess"><b>♞ Claudy 체스</b></button>
+  <button class="tab" role="tab" data-id="five"><b>● ClaudyFive 오목</b></button>
+  <button class="tab" role="tab" data-id="shape"><b>✎ shape 도형 인식</b></button>
+</nav>
+<main>
+  <header>
+    <h1 id="title"></h1><span class="sp"></span>
+    <button class="btn" id="pop">새 탭에서 열기</button>
+  </header>
+  <div class="stage">
+    <iframe id="f-chess" hidden title="체스"></iframe>
+    <iframe id="f-five" hidden title="오목"></iframe>
+    <iframe id="f-shape" hidden title="도형 인식"></iframe>
+  </div>
+</main>
+<script>
+const APPS={
+  chess:{title:'Claudy 체스',url:'chess/'},
+  five:{title:'ClaudyFive 오목',url:'five/'},
+  shape:{title:'shape 도형 인식',url:'shape/'}};
+const $=s=>document.querySelector(s);
+let cur=null;
+function show(id){
+  cur=id;
+  document.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected',t.dataset.id===id));
+  document.querySelectorAll('iframe').forEach(f=>f.hidden=true);
+  $('#title').textContent=APPS[id].title;
+  try{localStorage.hubTab=id}catch{}
+  const f=$('#f-'+id);
+  if(!f.src)f.src=APPS[id].url;
+  f.hidden=false;
+}
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>show(t.dataset.id));
+$('#pop').onclick=()=>window.open(APPS[cur].url,'_blank');
+document.addEventListener('keydown',e=>{
+  if(e.target.closest('input,textarea')||e.ctrlKey||e.metaKey||e.altKey)return;
+  const id={1:'chess',2:'five',3:'shape'}[e.key];if(id)show(id);
+});
+let start='five';try{start=localStorage.hubTab||'five'}catch{}
+show(APPS[start]?start:'five');
+</script>
+</body>
+</html>
