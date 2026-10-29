@@ -238,20 +238,21 @@ function claudyFiveFactory() {
   // ------------------------------------------------------------------------------------------------
   //  depth  maximum iterative-deepening depth        width  candidate moves searched per node
   //  nodes  node budget (0 = none), checked after depth 1 is complete;   ms  time limit (0 = none)
+  //  rnd    % chance of an arbitrary move next to the stones (ignores wins and blocks)
   //  noise  sd of the deterministic evaluation noise   blunder  % chance of a plausible wrong move
   //  miss   % chance of overlooking a four (lowest levels)   win4  recognises open fours / double fours
   //  vcf    depth of the four-chain search at leaves       defw  how much opponent threats weigh in the eval
   const LEVELS = [null,
-    { name: '입문',     info: '초등학생도 이길 수 있어요',        depth: 1,  width: 5,  nodes: 0,      ms: 0,    noise: 260, blunder: 16, miss: 30, win4: false, vcf: 0,  defw: 0.3 },
-    { name: '초급',     info: '기본 규칙을 아는 정도',             depth: 1,  width: 8,  nodes: 0,      ms: 0,    noise: 90,  blunder: 6,  miss: 10, win4: false, vcf: 0,  defw: 0.65 },
-    { name: '초중급',   info: '열린 3은 막을 줄 알아요',          depth: 2,  width: 8,  nodes: 0,      ms: 0,    noise: 60,  blunder: 4,  miss: 3,  win4: true,  vcf: 0,  defw: 0.8 },
-    { name: '중급',     info: '간단한 공격 수순을 읽어요',        depth: 3,  width: 9,  nodes: 4000,   ms: 0,    noise: 40,  blunder: 2,  miss: 0,  win4: true,  vcf: 2,  defw: 0.85 },
-    { name: '중상급',   info: '4-3, 쌍삼 같은 기본기를 써요',     depth: 4,  width: 10, nodes: 12000,  ms: 0,    noise: 25,  blunder: 1,  miss: 0,  win4: true,  vcf: 4,  defw: 0.9 },
-    { name: '상급',     info: '꽤 멀리 읽어요',                  depth: 6,  width: 11, nodes: 40000,  ms: 0,    noise: 15,  blunder: 0,  miss: 0,  win4: true,  vcf: 6,  defw: 0.9 },
-    { name: '고급',     info: '연속 4 공격(VCF)을 잘 봐요',       depth: 8,  width: 10, nodes: 150000, ms: 2000, noise: 20,  blunder: 0,  miss: 0,  win4: true,  vcf: 8, defw: 0.9 },
-    { name: '준마스터', info: '아마추어 고수도 어려워요',         depth: 10, width: 12, nodes: 0,      ms: 2500, noise: 12,  blunder: 0,  miss: 0,  win4: true,  vcf: 10, defw: 0.9 },
-    { name: '마스터',   info: '강한 수읽기',                     depth: 14, width: 14, nodes: 0,      ms: 4000, noise: 6,   blunder: 0,  miss: 0,  win4: true,  vcf: 14, defw: 0.9 },
-    { name: '최강',     info: '이 엔진의 전력',                  depth: 24, width: 16, nodes: 0,      ms: 6000, noise: 3,   blunder: 0,  miss: 0,  win4: true,  vcf: 16, defw: 0.9 },
+    { name: '입문',     info: '거의 아무렇게나 둬요', depth: 1, rnd: 90,  width: 5,  nodes: 0,      ms: 0,    noise: 260, blunder: 16, miss: 30, win4: false, vcf: 0,  defw: 0.3 },
+    { name: '초급',     info: '대부분 엉뚱한 곳에 둬요', depth: 1, rnd: 72,  width: 8,  nodes: 0,      ms: 0,    noise: 90,  blunder: 6,  miss: 10, win4: false, vcf: 0,  defw: 0.65 },
+    { name: '초중급',   info: '자주 실수해요', depth: 2, rnd: 52,  width: 8,  nodes: 0,      ms: 0,    noise: 60,  blunder: 4,  miss: 3,  win4: true,  vcf: 0,  defw: 0.8 },
+    { name: '중급',     info: '가끔 엉뚱한 수를 둬요', depth: 3, rnd: 34,  width: 9,  nodes: 4000,   ms: 0,    noise: 40,  blunder: 2,  miss: 0,  win4: true,  vcf: 2,  defw: 0.85 },
+    { name: '중상급',   info: '기본기는 있지만 허술해요', depth: 4, rnd: 20,  width: 10, nodes: 12000,  ms: 0,    noise: 25,  blunder: 1,  miss: 0,  win4: true,  vcf: 4,  defw: 0.9 },
+    { name: '상급',     info: '가끔 실수해요', depth: 6, rnd: 9,  width: 11, nodes: 40000,  ms: 0,    noise: 15,  blunder: 0,  miss: 0,  win4: true,  vcf: 6,  defw: 0.9 },
+    { name: '고급',     info: '연속 4 공격(VCF)을 잘 봐요', depth: 8, rnd: 3,  width: 10, nodes: 150000, ms: 2000, noise: 20,  blunder: 0,  miss: 0,  win4: true,  vcf: 8, defw: 0.9 },
+    { name: '준마스터', info: '아마추어 고수도 어려워요', depth: 10, width: 12, nodes: 0,      ms: 2500, noise: 12,  blunder: 0,  miss: 0,  win4: true,  vcf: 10, defw: 0.9 },
+    { name: '마스터',   info: '강한 수읽기', depth: 14, width: 14, nodes: 0,      ms: 4000, noise: 6,   blunder: 0,  miss: 0,  win4: true,  vcf: 14, defw: 0.9 },
+    { name: '최강',     info: '이 엔진의 전력', depth: 24, width: 16, nodes: 0,      ms: 6000, noise: 3,   blunder: 0,  miss: 0,  win4: true,  vcf: 16, defw: 0.9 },
   ];
 
   let params = LEVELS[10];
@@ -518,6 +519,13 @@ function claudyFiveFactory() {
 
     if (stoneCnt === 0) return finish(cellIndex(7, 7), 0, 0);
     if (stoneCnt >= NN) return null;
+
+    // ---- lowest levels: sometimes an arbitrary move next to the stones, wins and blocks ignored ----
+    if (params.rnd && rand() * 100 < params.rnd) {
+      const pool = [];
+      for (let i = 0; i < NN; i++) { const q = CELLS[i]; if (board[q] === EMPTY && nb[q] > 0) pool.push(q); }
+      if (pool.length) return finish(pool[(rand() * pool.length) | 0], 0, 0, { random: true });
+    }
 
     // ---- root scan: immediate wins and forced replies are exact at every level -----------------
     const mi = stm - 1, oi = 1 - mi;
