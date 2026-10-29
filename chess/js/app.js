@@ -556,7 +556,38 @@ function activeAnalysisCount() {
   return mode === "analysis" ? Math.max(1, S.anEngines.filter(avail).length) : 1;
 }
 
+// Hint: the strongest Claudy suggests a move for the person to move; shown as an arrow until a move is played.
+let hintState = null;       // {idx, uci}
+let hintBusy = false;
+async function hint() {
+  if (hintBusy || !P.active || P.over || P.paused || G.cursor !== G.plies.length) return;
+  const idx = G.plies.length;
+  if (!isHuman(chessAt(idx).turn())) return;
+  hintBusy = true;
+  $("#btn-hint").disabled = true;
+  $("#btn-hint").textContent = "Thinking…";
+  try {
+    const eng = await getEngine("claudy");
+    const res = await eng.begin({
+      options: baseOptions("claudy", { multipv: 1, active: 1, strength: null }),
+      pos: posCmd(idx), go: "go movetime 2000",
+      cancelled: () => G.plies.length !== idx || !P.active,
+    });
+    if (res && res.best && G.plies.length === idx) hintState = { idx, uci: res.best };
+  } catch (e) { /* engine unavailable */ }
+  hintBusy = false;
+  $("#btn-hint").disabled = false;
+  $("#btn-hint").textContent = "Hint";
+  renderArrows();
+}
+
 function renderArrows() {
+  if (mode === "play") {
+    const h = hintState;
+    board.setArrows(h && P.active && h.idx === G.plies.length && G.cursor === h.idx
+      ? [{ from: h.uci.slice(0, 2), to: h.uci.slice(2, 4), color: "#e8941a", width: 0.17, opacity: 0.85 }] : []);
+    return;
+  }
   if (mode !== "analysis" || review.active) { board.setArrows([]); return; }
   const arrows = [];
   for (const id of S.anEngines) {
@@ -915,8 +946,10 @@ function renderPlayPanel() {
     $("#ig-pause").textContent = P.paused ? "Resume" : "Pause";
     $("#ig-analyze").hidden = !P.over;
     $("#btn-undo").hidden = !(P.active && ["w", "b"].filter(isHuman).length === 1);
+    $("#btn-hint").hidden = $("#btn-undo").hidden;
   } else {
     $("#btn-undo").hidden = true;
+    $("#btn-hint").hidden = true;
   }
 }
 
@@ -1113,6 +1146,7 @@ function wire() {
   $("#nav-next").onclick = () => gotoPly(G.cursor + 1);
   $("#nav-last").onclick = () => gotoPly(G.plies.length);
   $("#btn-undo").onclick = takeback;
+  $("#btn-hint").onclick = hint;
   $("#btn-settings").onclick = () => { buildSettings(); $("#dlg-settings").showModal(); };
 
   $("#ng-start").onclick = startGame;
