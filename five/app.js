@@ -376,6 +376,7 @@ else if(m.type==='go'){
   });
   boardEl.addEventListener('pointerleave', () => { ghostEl.hidden = true; });
   boardEl.addEventListener('click', (e) => {
+    if (e.target.closest('.banner')) return;          // the end-of-game card sits on the board: its buttons must not place a stone
     const c = cellFromEvent(e);
     if (c) humanMove(c[0], c[1]);
   });
